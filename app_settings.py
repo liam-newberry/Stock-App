@@ -1,0 +1,10 @@
+# File created by: Liam Newberry
+WIDTH = 1600
+HEIGHT = 900
+FPS = 45
+
+PRIMARY_COLOR = (0,0,0)
+SECONDARY_COLOR = (50,200,80)
+LIST_COLOR = (50,50,50)
+
+BLACK = (0,0,0)
