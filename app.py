@@ -43,7 +43,6 @@ class Main:
         self.screen.fill(PRIMARY_COLOR)
         for button in self.button_list:
             newly_selected = button.update(self.clicked)
-            # print(newly_selected, button.text)
             if str(type(button)) == "<class 'objects.NavButton'>" and newly_selected:
                 for b in self.button_list:
                     b.selected = False
@@ -54,7 +53,6 @@ class Main:
         # for i in range(1,len(self.stock)):
         #     pg.draw.circle(self.screen,(255,0,0),[i*3,HEIGHT - 3 * int(self.stock[i])],1.5)
         pg.display.flip()
-        print(self.page)
     def run(self):
         frames = 0
         while self.running:
