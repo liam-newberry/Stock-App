@@ -3,9 +3,9 @@ import datetime
 import os
 import shutil
 
-current_path = os.getcwd()
-current_folder = os.path.dirname(__file__)
-text_file_folder_path = current_path + "\Text Files"
+from app_settings import *
+
+
 
 def create_bank_event_dict(year:int,month:int,day:int,destination:str,
                            dollars:float):
@@ -28,11 +28,11 @@ def create_text_file_dict(bank_history:list,stock_history:list,interactions_left
     return text_file_dict
 
 def create_text_file_folder():
-    if os.path.exists(text_file_folder_path):
-        for file in os.scandir(text_file_folder_path):
+    if os.path.exists(TEXT_FILE_FOLDER_PATH):
+        for file in os.scandir(TEXT_FILE_FOLDER_PATH):
             os.remove(file)
     else:
-        os.makedirs(text_file_folder_path)
+        os.makedirs(TEXT_FILE_FOLDER_PATH)
 
 def create_stock_event_dict(year:int,month:int,day:int,type:str,
                             ticker:str,dollars:float,shares:float):
@@ -47,11 +47,11 @@ def create_stock_event_dict(year:int,month:int,day:int,type:str,
 def move_text_files(text_file_dict):
     create_text_file_folder()
     for item in text_file_dict:
-        shutil.move(current_path + "\\" + item, text_file_folder_path )
+        shutil.move(CURRENT_PATH + "\\" + item, TEXT_FILE_FOLDER_PATH )
 
 def read_bank_history_file():
     bank_history = []
-    with open(text_file_folder_path + "\\bank history","r") as file:
+    with open(TEXT_FILE_FOLDER_PATH + "\\bank history","r") as file:
         content = file.readlines()
         for i in range(0,int(len(content)/5)):
             dictionary = create_bank_event_dict(int(content[i*5][:-1]),
@@ -71,7 +71,7 @@ def read_text_files():
     return bank_history,stock_history,month_end,last_update
 
 def read_last_update_file():
-    with open(text_file_folder_path + "\\last update","r") as file:
+    with open(TEXT_FILE_FOLDER_PATH + "\\last update","r") as file:
         content = file.readlines()
         last_update = {"year":int(content[0][:-1]),
                        "month":int(content[1][:-1]),
@@ -81,7 +81,7 @@ def read_last_update_file():
         
 
 def read_month_end_file():
-    with open(text_file_folder_path + "\\last update","r") as file:
+    with open(TEXT_FILE_FOLDER_PATH + "\\last update","r") as file:
         content = file.readlines()
         month_end = {"year":int(content[0][:-1]),
                      "month":int(content[1][:-1]),
@@ -91,7 +91,7 @@ def read_month_end_file():
 
 def read_stock_history_file():
     stock_history = []
-    with open(text_file_folder_path + "\\stock history","r") as file:
+    with open(TEXT_FILE_FOLDER_PATH + "\\stock history","r") as file:
         content = file.readlines()
         for i in range(0,int(len(content)/7)):
             dictionary = create_stock_event_dict(int(content[i*7][:-1]),
@@ -141,22 +141,24 @@ def write_stock_history_file(history:list):
                 file.write(str(dictionary[item]) + "\n")
     file.close()
 
-bh1 = create_bank_event_dict(2007,2,24,"checkings",76686.23)
-sh1 = create_stock_event_dict(1992,3,6,"sell","TSLA",988.23,2.3)
-text_file_dict = create_text_file_dict([bh1,bh1,bh1],[sh1,sh1,sh1],3)
+# TEST EXAMPLE {
+# bh1 = create_bank_event_dict(2007,2,24,"checkings",76686.23)
+# sh1 = create_stock_event_dict(1992,3,6,"sell","TSLA",988.23,2.3)
+# text_file_dict = create_text_file_dict([bh1,bh1,bh1],[sh1,sh1,sh1],3)
 
-write_text_files(text_file_dict)
+# write_text_files(text_file_dict)
 
-bh,sh,me,lu = read_text_files()
-print("BH")
-for item in bh:
-    print(item)
-print("SH")
-for item in sh:
-    print(item)
-print("ME")
-for item in me:
-    print(me[item])
-print("LU")
-for item in lu:
-    print(lu[item])
+# bh,sh,me,lu = read_text_files()
+# print("BH")
+# for item in bh:
+#     print(item)
+# print("SH")
+# for item in sh:
+#     print(item)
+# print("ME")
+# for item in me:
+#     print(me[item])
+# print("LU")
+# for item in lu:
+#     print(lu[item])
+# }

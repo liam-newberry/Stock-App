@@ -13,45 +13,90 @@ class Main:
         pg.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
-        pg.display.set_caption("Stocks")
-        # self.logo_image = pg.image.load(os.path.join(main_folder,"logo.png")).convert()
-        # self.logo_image = pg.transform.scale(self.logo_image,(70,70))
-        # pg.display.set_icon(self.logo_image)
+        pg.display.set_caption(APP_NAME)
+        self.icon_image = pg.image.load("icon.png").convert()
+        self.icon_image.set_colorkey(BLACK)
+        pg.display.set_icon(self.icon_image)
     def new(self):
         self.running = True
         self.clicked = False
         self.stock_list = get_tickers()
         self.page = "Portfolio"
-        self.button_list = []
+        self.page_objects = []
         self.nav_dict = {"Portfolio":print,
                          "Finance":print,
                          "History":print,
                          "Search":print}
         nav_list, self.x_margin = create_nav_bar(self.screen,self.nav_dict,
-                                                 50,0,self.page)
-        self.button_list += nav_list
+                                                 50,93,self.page)
+        for nav_button in nav_list:
+            self.page_objects.append(nav_button)
+        self.x_margin += 18
+        self.page_objects += nav_list
+        self.logo_image = pg.image.load("logo.png").convert()
+        self.logo_image_rect = self.logo_image.get_rect()
+        self.logo_image.set_colorkey(BLACK)
+        self.logo_image = pg.transform.scale(self.logo_image,
+                                             (LOGO_SCALE * self.logo_image_rect[2],
+                                              LOGO_SCALE * self.logo_image_rect[3]))
+        self.sb = SearchBar(self.screen,"Input a Ticker",
+                            [self.x_margin + ((WIDTH - self.x_margin) * 0.05),
+                            HEIGHT * 0.03,
+                            (WIDTH - self.x_margin) * 0.9,
+                            70],
+                            None,page="Search")
+        self.keys_down = []
+        self.key_up = ""
+        # self.sb = SearchBar(self.screen,"Ticker:",[self.x_margin + ((WIDTH - self.x_margin) * 0.05),
+        #                                            HEIGHT * 0.03,
+        #                                            800,
+        #                                            40],None,page="Search")
     def events(self):
         self.clicked = False
+        self.key_up = ""
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONUP:
                 self.clicked = True
             if event.type == pg.QUIT:
                 self.running = False
+            if "unicode" in event.dict:
+                key = event.dict["unicode"]
+                key = key.upper()
+                if key not in self.keys_down:
+                    self.keys_down.append(key)
+                elif key in self.keys_down:
+                    self.key_up = key
+                    self.keys_down.remove(key)
     def update(self):
         self.now = pg.time.get_ticks()
+        # for button in self.page_objects:
+        #     if button.page not in [self.page,"constant"]:
+        #         self.page_objects.remove(button)\
     def draw(self):
         self.screen.fill(PRIMARY_COLOR)
-        for button in self.button_list:
-            newly_selected = button.update(self.clicked)
-            if str(type(button)) == "<class 'objects.NavButton'>" and newly_selected:
-                for b in self.button_list:
-                    b.selected = False
-                button.selected = True
-                self.page = button.text
+        for obj in self.page_objects:
+            obj_type = str(type(obj))
+            if obj.page not in ["constant",self.page]:
+                self.page_objects.remove(obj)
+            if obj_type in ["<class 'objects.Button'>","<class 'objects.NavButton'>"]:
+                newly_selected = obj.update(self.clicked)
+            if obj_type == "<class 'objects.NavButton'>" and newly_selected:
+                for button in self.page_objects:
+                    button.selected = False
+                obj.selected = True
+                self.page = obj.text
+                # DELETE ME {
+                if self.page == "Search":
+                    self.page_objects.append(self.sb)
+                # }
+            if obj_type == "<class 'objects.SearchBar'>":
+                obj.update(self.clicked,self.key_up)
         pg.draw.rect(self.screen,SECONDARY_COLOR,[self.x_margin,0,3,HEIGHT])
         pg.draw.rect(self.screen,(255,0,0),[0,HEIGHT/2,WIDTH,1]) # Temp midline
+        self.screen.blit(self.logo_image,(20,25))
         # for i in range(1,len(self.stock)):
         #     pg.draw.circle(self.screen,(255,0,0),[i*3,HEIGHT - 3 * int(self.stock[i])],1.5)
+        # self.sb.update(self.clicked,self.key_up)
         pg.display.flip()
     def run(self):
         frames = 0

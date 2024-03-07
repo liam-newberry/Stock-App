@@ -62,6 +62,24 @@ def draw_round_rect(surface:object,color:tuple,radius:int,coordinates:list,size:
     w_rect = pg.draw.rect(surface,color,[tl_circ.center[0],tl_circ.y,w_rect_length,w_rect_width])
     return [coordinates[0],coordinates[1],size[0],size[1]]
 
+def draw_round_rect2(surface:object,color:tuple,radius:int,rect:list):
+    coordinates = [rect[0],rect[1]]
+    size = [rect[2],rect[3]]
+
+    tl_coords = [coordinates[0]+radius,coordinates[1]+radius]
+    tl_circ = pg.draw.circle(surface,color,tl_coords,radius)
+    tr_coords = [coordinates[0]+size[0]-radius,coordinates[1]+radius]
+    tr_circ = pg.draw.circle(surface,color,tr_coords,radius)
+    bl_coords = [coordinates[0]+radius,coordinates[1]+size[1]-radius]
+    bl_circ = pg.draw.circle(surface,color,bl_coords,radius)
+    br_coords = [coordinates[0]+size[0]-radius,coordinates[1]+size[1]-radius]
+    br_circ = pg.draw.circle(surface,color,br_coords,radius)
+
+    width_rect = [coordinates[0],coordinates[1]+radius,size[0],size[1]-2*radius]
+    width_rectangle = pg.draw.rect(surface,color,width_rect)
+    height_rect = [coordinates[0]+radius,coordinates[1],size[0]-2*radius,size[1]]
+    height_rectangle = pg.draw.rect(surface,color,height_rect)
+
 def draw_text(surface:object,text:str,coordinates:list,pt:int,color:tuple=BLACK,
               align:str="topleft",font:str="ariel",bold:bool=False,italicize:bool=False,draw:bool=True):
     font_name = pg.font.match_font(font, bold, italicize)
