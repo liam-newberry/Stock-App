@@ -1,9 +1,9 @@
+from string import ascii_uppercase
 import pygame as pg
 from pygame.sprite import Sprite
 
 from app_settings import *
 from draw_funcs import *
-from object_funcs import *
 
 class Button:
     def __init__(self,surface:pg.Surface,text:str,rect:list,function,button_color:list,
@@ -35,8 +35,53 @@ class Button:
                   [self.x+self.width/2,self.y+self.height/2],
                   int(self.height*1),self.text_color,"center")
 
+class ErrorMessage:
+    def __init__(self,text_args,time):
+        self.text_args = text_args
+        self.time = time
+        self.last_update = pg.time.get_ticks() - time
+    def update(self):
+        self.now = pg.time.get_ticks()
+        time_passed = self.now - self.last_update
+        if time_passed < self.time:
+            self.draw()
+    def draw(self):
+        ta = self.text_args
+        if len(ta) == 4:
+            draw_text(ta[0],ta[1],ta[2],ta[3])
+        else:
+            draw_text(ta[0],ta[1],ta[2],ta[3],ta[4],ta[5],ta[6],ta[7],ta[8])
+    def renew(self):
+        self.last_update = self.now
+
 class Image:
-    pass
+    def __init__(self,surface:pg.Surface,name:str,coordinates:tuple,
+                 page:str="constant",colorkey:tuple=None,alpha:int=255):
+        self.surface = surface
+        self.name = name
+        self.coordinates = coordinates
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        self.page = page
+        self.image = pg.image.load(name).convert()
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        print(self.rect)
+        self.size = [self.rect[2],self.rect[3]]
+        self.width = self.size[0]
+        self.height = self.size[1]
+        self.colorkey = colorkey
+        if colorkey != None:
+            self.image.set_colorkey(colorkey)
+        self.image.set_alpha(alpha)
+    def draw(self):
+        self.surface.blit(self.image,self.rect)
+    def scale(self,size:tuple):
+        self.image = pg.transform.scale(self.image,size)
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
 
 class NavButton(Button):
     def __init__(self,surface:pg.Surface,text:str,text_rect:list,function,selected:bool=False):
@@ -86,7 +131,19 @@ class Page():
         self.object_list = []
 
 class Rectangle():
-    pass
+    def __init__(self,surface:pg.Surface,rect:list,color:tuple,page:str="constant"):
+        self.surface = surface
+        self.rect = rect
+        self.coordinates = [rect[0],rect[1]]
+        self.size = [rect[2],rect[3]]
+        self.x = rect[0]
+        self.y = rect[1]
+        self.width = rect[2]
+        self.height = rect[3]
+        self.color = color
+        self.page = page
+    def draw(self):
+        pg.draw.rect(self.surface,self.color,self.rect)
 
 class SearchBar():
     def __init__(self,surface:pg.Surface,background_text:str,
@@ -94,14 +151,17 @@ class SearchBar():
         self.surface = surface
         self.background_text = background_text
         self.rect = rect
+
         self.coordinates = [rect[0],rect[1]]
         self.size = [rect[2],rect[3]]
         self.x = self.coordinates[0]
         self.y = self.coordinates[1]
         self.width = self.size[0]
         self.height = self.size[1]
+
         self.font = font
         self.page = page
+
         self.clicked = False
         self.typed = ""
         self.last_cursor_blink = 0
@@ -111,12 +171,39 @@ class SearchBar():
                     self.width-(2*self.inner_bar_margin),self.height-(2*self.inner_bar_margin)]
         self.outer_bar = Button(self.surface,"",self.rect,print,SECONDARY_COLOR,BLACK,
                                 self.page,radius=25)
-        self.inner_bar = Button(self.surface,"Button",new_rect,print,PRIMARY_COLOR,
+        self.inner_bar = Button(self.surface,"",new_rect,print,PRIMARY_COLOR,
                                 BLACK,self.page,20)
         self.font_size = int(self.inner_bar.height * 0.8)
         self.text_margin = self.inner_bar.height * 0.2
         self.text_coordinates = (self.inner_bar.x + self.text_margin,
                                  self.inner_bar.y + self.inner_bar.height/2)
+        
+        factor = 0.2
+        margin = self.inner_bar.height * factor
+        size = (1 - (2 * factor)) * self.inner_bar.height
+        self.clear_button = Image(self.surface,"clear text.png",
+                                  [self.inner_bar.x + self.inner_bar.width - size - margin,
+                                   self.inner_bar.y + margin],
+                                   colorkey=BLACK)
+        self.clear_button.scale([size,size])
+
+        error_message_coordinates = [self.outer_bar.x + self.outer_bar.width/2,
+                                     self.outer_bar.y + self.outer_bar.height * 1.2]
+        self.error_dict = {"too long":
+                           ErrorMessage([self.surface,MAX_TICKER_LENGTH_MESSAGE,
+                                        error_message_coordinates,self.font_size,
+                                        RED,"midtop",FONT,False,False],
+                                        ERROR_MESSAGE_TIME),
+                           "too short":
+                           ErrorMessage([self.surface,MIN_TICKER_LENGTH_MESSAGE,
+                                        error_message_coordinates,self.font_size,
+                                        RED,"midtop",FONT,False,False],
+                                        ERROR_MESSAGE_TIME),
+                           "invalid char":
+                           ErrorMessage([self.surface,INVALID_CHAR_MESSAGE,
+                                        error_message_coordinates,self.font_size,
+                                        RED,"midtop",FONT,False,False],
+                                        ERROR_MESSAGE_TIME)}
     def update(self,click:bool,key_up:list):
         pos = pg.mouse.get_pos()
         self.now = pg.time.get_ticks()
@@ -124,37 +211,50 @@ class SearchBar():
             if collides(self.rect,coordinates=pos):
                 self.clicked = True
                 self.last_cursor_blink = self.now
+                if collides(self.clear_button.rect,coordinates=pos):
+                    self.typed = ""
             else:
                 self.clicked = False
+
         if self.now - self.last_cursor_blink >= 2 * CURSOR_BLINK_INTERVAL:    
             self.last_cursor_blink = self.now
+
+        for message in self.error_dict:
+            self.error_dict[message].update()
+
         if self.clicked:
             self.typing(key_up)
         self.draw(click)
     def typing(self,key_up:list):
-        if key_up == "\x08":
+        if key_up == "":
+            pass
+        elif key_up == "\x08":
             if len(self.typed) > 0:
                 self.typed = self.typed[:-1]
-        elif len(self.typed) < 5:
+        elif key_up == "\r":
+            if len(self.typed) > 0:
+                self.clicked = False
+                self.search()
+            else:
+                self.error_dict["too short"].renew()
+        elif len(self.typed) < 5 and key_up in ascii_uppercase:
             self.typed += key_up
         elif len(self.typed) == 5:
-            pass # insert draw warning message from settings.py
+            self.error_dict["too long"].renew()
+        elif key_up not in ascii_uppercase and key_up != "":
+            self.error_dict["invalid char"].renew()
     def draw(self,click:bool):
         self.outer_bar.update(click)
         self.inner_bar.update(click)
+        self.clear_button.draw()
+
         if self.typed == "" and not self.clicked:
             draw_text(self.surface,self.background_text,self.text_coordinates,
                       self.font_size,SEARCH_BAR_BACKGROUND_TEXT_COLOR,align="midleft")
         else:
-            pass
-            # draw_text("fix this/temporary")
-        # self.typed_rect = draw_text(self.surface,"hello",
-        #                             self.coordinates,
-        #                             50,WHITE,align="midleft")
-        # self.typed_rect = draw_text(self.surface,self.typed,
-        #                             [self.x + 20, self.y + (self.height/2)],
-        #                             30,BLACK,align="midleft")
-        # print(True)
+            draw_text(self.surface,self.typed,self.text_coordinates,self.font_size,
+                      SECONDARY_COLOR,align="midleft")
+
         if self.clicked:
             self.clicked_animation()
     def clicked_animation(self):
@@ -165,6 +265,8 @@ class SearchBar():
                            CURSOR_WIDTH,
                            self.inner_bar.height * 0.8]
             pg.draw.rect(self.surface,WHITE,cursor_rect)
+    def search(self):
+        pass
 
 def collides(rect1:list,rect2:list=None,coordinates:list=None):
     if rect2 != None:

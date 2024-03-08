@@ -51,6 +51,7 @@ class Main:
         #                                            HEIGHT * 0.03,
         #                                            800,
         #                                            40],None,page="Search")
+        self.i = 0
     def events(self):
         self.clicked = False
         self.key_up = ""
@@ -86,7 +87,7 @@ class Main:
                 obj.selected = True
                 self.page = obj.text
                 # DELETE ME {
-                if self.page == "Search":
+                if self.page == "Search" and self.sb not in self.page_objects:
                     self.page_objects.append(self.sb)
                 # }
             if obj_type == "<class 'objects.SearchBar'>":
@@ -94,6 +95,7 @@ class Main:
         pg.draw.rect(self.screen,SECONDARY_COLOR,[self.x_margin,0,3,HEIGHT])
         pg.draw.rect(self.screen,(255,0,0),[0,HEIGHT/2,WIDTH,1]) # Temp midline
         self.screen.blit(self.logo_image,(20,25))
+        self.i += 1
         # for i in range(1,len(self.stock)):
         #     pg.draw.circle(self.screen,(255,0,0),[i*3,HEIGHT - 3 * int(self.stock[i])],1.5)
         # self.sb.update(self.clicked,self.key_up)
