@@ -2,7 +2,7 @@
 import pygame as pg
 from pygame.sprite import Sprite
 
-from app_settings import *
+from settings import *
 
 def draw_divider_horizantal(surface:object,color:tuple,y_coord:int,size:int):
     pg.draw.rect(surface,color,[0,y_coord,WIDTH,size])

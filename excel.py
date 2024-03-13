@@ -4,10 +4,10 @@ import xlsxwriter
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-from app_settings import *
+from settings import *
 
 def get_tickers():
-    wb_obj = openpyxl.load_workbook("stock_prices.xlsx")
+    wb_obj = openpyxl.load_workbook("portfolio_history.xlsx")
     sheet_obj = wb_obj.active
     tickers = []
     for i in range(2,52):
@@ -61,7 +61,7 @@ def get_1y(data_frame:pd,abbr:str):
     return dates2, stock
 
 def get_stock(abbr:str,time:str,temp:bool=False):
-    path = "stock_prices.xlsx"
+    path = "portfolio_history.xlsx"
     if temp:
         path = "temp.xlsx"
 

@@ -2,8 +2,10 @@ from string import ascii_uppercase
 import pygame as pg
 from pygame.sprite import Sprite
 
-from app_settings import *
+from settings import *
 from draw_funcs import *
+from folder_funcs import *
+from stocks import *
 
 class Button:
     def __init__(self,surface:pg.Surface,text:str,rect:list,function,button_color:list,
@@ -63,7 +65,7 @@ class Image:
         self.x = coordinates[0]
         self.y = coordinates[1]
         self.page = page
-        self.image = pg.image.load(name).convert()
+        self.image = get_image("clear text.png")
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -125,10 +127,23 @@ class NavButton(Button):
                      [x,y,width,height])
 
 class Page():
-    def __init__(self,app:object,name:str):
-        self.app = app
+    def __init__(self,surface:pg.Surface,name:str,rect:list):
+        self.surface = surface
         self.name = name
+        self.rect = rect
+        self.coordinates = [rect[0],rect[1]]
+        self.size = [rect[2],rect[3]]
+        self.x = rect[0]
+        self.y = rect[1]
+        self.width = rect[2]
+        self.height = rect[3]
         self.object_list = []
+    def update(self):
+        for object in self.object_list:
+            object.update()
+        # add lots of code from app.py draw function in App
+    def add_object(self,object:object):
+        self.object_list.append(object)
 
 class Rectangle():
     def __init__(self,surface:pg.Surface,rect:list,color:tuple,page:str="constant"):
@@ -266,7 +281,8 @@ class SearchBar():
                            self.inner_bar.height * 0.8]
             pg.draw.rect(self.surface,WHITE,cursor_rect)
     def search(self):
-        pass
+        stock_pd = get_stock(self.typed,"1W")
+        print(stock_pd)
 
 def collides(rect1:list,rect2:list=None,coordinates:list=None):
     if rect2 != None:

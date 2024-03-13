@@ -5,6 +5,8 @@ WIDTH = 1600
 HEIGHT = 900
 FPS = 45
 # Folders
+MAIN_FOLDER = os.path.dirname(__file__)
+IMAGE_FOLDER = os.path.join(MAIN_FOLDER,"Images")
 CURRENT_PATH = os.getcwd()
 TEXT_FILE_FOLDER_PATH = CURRENT_PATH + "\Text Files"
 # Strings
@@ -24,7 +26,6 @@ CURSOR_WIDTH = 4
 CURSOR_BLINK_INTERVAL = 600
 ERROR_MESSAGE_TIME = 1500
 FONT = "ariel"
-
 # Common colors
 BLACK = (0,0,0)
 WHITE = (255,255,255)

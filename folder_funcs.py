@@ -1,9 +1,10 @@
 # File created by: Liam Newberry
 import datetime
 import os
+import pygame as pg
 import shutil
 
-from app_settings import *
+from settings import *
 
 
 
@@ -43,6 +44,9 @@ def create_stock_event_dict(year:int,month:int,day:int,type:str,
             "ticker":ticker,
             "dollars":dollars,
             "shares":shares}
+
+def get_image(name:str):
+    return pg.image.load(os.path.join(IMAGE_FOLDER,name)).convert()
 
 def move_text_files(text_file_dict):
     create_text_file_folder()
