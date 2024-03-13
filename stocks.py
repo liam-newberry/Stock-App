@@ -42,8 +42,9 @@ start_dates = {"1D":get_start_date(1),
                "5Y":get_start_date(1826),
                "10Y":get_start_date(3652)}
 
-# TEST:
+# TEST {
 # tickers = ["AAPL","KO","TSLA"]
 # create_portfolio_sheet(tickers)
 
 # print(get_stock("AAPL","1W"))
+# }
